@@ -1,3 +1,4 @@
+var url = require('url');
 var cool = require('cool-ascii-faces');
 var express = require('express');
 var app = express();
@@ -29,7 +30,21 @@ app.get('/times', function(request, response) {
 });
 
 app.get('/db', function(request, response) {
-  pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+  const params = url.parse('postgres://ldwxuxokovausm:bc2b5bbaa679213d612a3baef3e360dba473ea3b4fbdd737e26781200e0721c6@ec2-54-221-221-153.compute-1.amazonaws.com:5432/d9bf6q69jmb59f');
+  const auth = params.auth.split(':');
+  
+  const config = {
+    user: auth[0],
+    password: auth[1],
+    host: params.hostname,
+    port: params.port,
+    database: params.pathname.split('/')[1],
+    ssl: true
+  };
+
+  var pool = new pg.Pool(config);
+
+  pool.connect(function(err, client, done) {
     client.query('SELECT * FROM test_table', function(err, result) {
       done();
 
